@@ -35,15 +35,15 @@ wss.on('connection', (ws, req) => {
     clients.add(ws);
     ws.send("👋 Welcome to SecureChat!");
 
-    ws.on('message', (message) => {
-        console.log(`📩 Received from ${clientIp}: ${message}`);
-        clients.forEach(client => {
-            if (client !== ws && client.readyState === WebSocket.OPEN) {
-                client.send(message);
-            }
-        });
-    });
+   ws.on('message', (message) => {
+    console.log('Received from ${clientIp}: ${message}');
 
+    clients.forEach(client => {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+            client.send(message.toString());
+        }
+    });
+   });
     ws.on('close', () => {
         console.log(`❌ Client from ${clientIp} disconnected`);
         clients.delete(ws);
@@ -54,6 +54,6 @@ wss.on('connection', (ws, req) => {
 const PORT = 8080;
 const SERVER_IP = '0.0.0.0'; // Listens for external devices
 server.listen(PORT, SERVER_IP, () => {
-    console.log(`✅ Server running at 10.67.215.104:${PORT}`);
+    console.log(`✅ Server running at SERVER_IP:${PORT}`);
     console.log(`✅ WebSocket running on ws://YOUR_LOCAL_IP:${PORT}`);
 });
