@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecureChat</title>
+
     <style>
+        /* Basic chat UI styling */
         body { font-family: Arial, sans-serif; margin: 20px; }
         #chatbox { width: 100%; height: 300px; border: 1px solid #ccc; overflow-y: auto; padding: 10px; }
         #messageInput { width: 80%; padding: 8px; }
@@ -14,59 +16,63 @@
 <body>
 
     <h2>SecureChat</h2>
+    
+    <!-- Chatbox where messages will appear -->
     <div id="chatbox"></div>
+
+    <!-- Input field and send button -->
     <input type="text" id="messageInput" placeholder="Type a message...">
     <button onclick="sendMessage()">Send</button>
 
     <script>
-        let ws;
-        const SERVER_IP = "192.168.1.158"; // Replace with your actual IP
-        const SERVER_PORT = 8080;
+        let ws; // WebSocket instance
+        const SERVER_IP = "192.168.1.158"; // Server IP address
+        const SERVER_PORT = 8080; // Server port
 
+        /**
+         * Establishes a WebSocket connection to the chat server.
+         * Automatically reconnects if disconnected.
+         */
         function connectWebSocket() {
             if (ws && ws.readyState === WebSocket.OPEN) return;
 
             ws = new WebSocket(`ws://${SERVER_IP}:${SERVER_PORT}`);
 
-            ws.onopen = () => {
-                console.log("✅ Connected to SecureChat");
-                appendMessage("🔗 Connected to server");
-            };
-
-            ws.onmessage = (event) => {
-                appendMessage("📩 " + event.data);
-            };
-
+            ws.onopen = () => appendMessage("🔗 Connected to server");
+            ws.onmessage = (event) => appendMessage("📩 " + event.data);
             ws.onclose = () => {
-                console.log("❌ Disconnected. Reconnecting in 5s...");
-                appendMessage("⚠️ Disconnected. Attempting to reconnect...");
+                appendMessage("⚠️ Disconnected. Reconnecting...");
                 setTimeout(connectWebSocket, 5000);
             };
-
-            ws.onerror = (error) => {
-                console.error("⚠️ WebSocket Error:", error);
-            };
+            ws.onerror = (error) => console.error("⚠️ WebSocket Error:", error);
         }
 
+        /**
+         * Sends a message to the WebSocket server if the connection is open.
+         */
         function sendMessage() {
             const input = document.getElementById("messageInput");
             const message = input.value.trim();
+
             if (message && ws.readyState === WebSocket.OPEN) {
                 ws.send(message);
                 appendMessage("📝 You: " + message);
-                input.value = "";
+                input.value = ""; // Clear input after sending
             }
         }
 
+        /**
+         * Displays messages in the chatbox.
+         */
         function appendMessage(text) {
             const chatbox = document.getElementById("chatbox");
             const messageElement = document.createElement("p");
             messageElement.textContent = text;
             chatbox.appendChild(messageElement);
-            chatbox.scrollTop = chatbox.scrollHeight;
+            chatbox.scrollTop = chatbox.scrollHeight; // Auto-scroll to the latest message
         }
 
-        connectWebSocket();
+        connectWebSocket(); // Connect WebSocket when page loads
     </script>
 
 </body>
