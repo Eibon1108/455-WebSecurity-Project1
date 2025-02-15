@@ -123,6 +123,23 @@ wss.on('connection', (ws, req) => {
     clients.add(ws);
     ws.send("Welcome to SecureChat!");
 
+    const RATELIMIT = 3; //this limits the rate to whatever number you want
+    var count = 0; //this is too keep track of how many messages have been sent
+
+    ws.on('message', (message) => {
+    console.log('Received from ' + clientIp + ': ' + message);//changed the console log
+
+
+    count = count + 1; //this adds to the count
+    console.log('Number of messages = ' + count); //shows the number of messages in console
+   
+    //Rate Limit Code
+    if (count == RATELIMIT) { //if message count equals ratelimit then
+        console.log('Number of message exceeds rate limit of ' + RATELIMIT); //log message in console
+        ws.close(); //disconnect
+    }
+
+
     // Handles incoming messages from clients
     ws.on('message', (message) => {
         console.log(`Received from ${clientIp}: ${message}`);
@@ -139,6 +156,7 @@ wss.on('connection', (ws, req) => {
     ws.on('close', () => {
         console.log(`Client from ${clientIp} disconnected`);
         clients.delete(ws);
+        });
     });
 });
 
